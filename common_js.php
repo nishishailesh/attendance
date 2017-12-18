@@ -2,7 +2,7 @@
 
 echo '<script>
 
-function run_ajax(str,rid)
+function run_ajax(str,rid,fname)
 {
 	//create object
 	xhttp = new XMLHttpRequest();
@@ -19,7 +19,7 @@ function run_ajax(str,rid)
 	};
 
 	//Setting FORM data
-	xhttp.open("POST", "save_presence.php", true);
+	xhttp.open("POST", fname, true);
 	
 	//Something required as header
 	xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -31,22 +31,37 @@ function run_ajax(str,rid)
 	//alert("Used to check if script reach here");
 }
 
-function make_post_string(student_id,lecture_id,present)
+function make_post_string(key,value)
 {
-	sid=encodeURIComponent(student_id);					//to encode almost everything
-	lid=encodeURIComponent(lecture_id);					//to encode almost everything
-	pre=encodeURIComponent(present);					//to encode almost everything
-	post=\'student_id=\'+sid+\'&lecture_id=\'+lid+\'&present=\'+pre;
-	return post;							
+	var ret=\'\';
+	for(var x=0;x<key.length;x++){
+					ret=ret+encodeURIComponent(key[x])+\'=\'+encodeURIComponent(value[x])+\'&\';
+					//ret=ret+key[x]+value[x];
+					}		
+	//alert(ret);				
+	return ret;						
 }
 
-function do_work(student_id,lecture_id,pre,div_id)
+function do_work(key,value,div_id,fname)
 {
-	str=make_post_string(student_id,lecture_id,pre);
-	//alert(post);
-	run_ajax(str,div_id);
+	str=make_post_string(key,value);
+	run_ajax(str,div_id,fname);
 }
 
+
+function showhide_with_label(one,labell,textt) {
+			if(document.getElementById(one).style.display == "none")
+			{
+				document.getElementById(one).style.display = "block";
+				labell.innerHTML="hide "+textt;
+			}
+			else
+			{
+				document.getElementById(one).style.display = "none";
+				labell.innerHTML="show "+textt;
+			}
+
+	}
 </script>
 
 ';
