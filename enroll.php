@@ -16,18 +16,23 @@ if(!isset($_SESSION['user']))
 	$_SESSION['user']=$_POST['user'];
 	$_SESSION['password']=$_POST['password'];
 }
+//$ap_verification=verify_ap_user($GLOBALS['main_user'],	$GLOBALS['main_pass'],	'lecturer',
+								//'attendance',			'user',
+								//'id',					$_SESSION['user'],
+								//'password',				$_SESSION['password']);
+
 $ap_verification=verify_ap_user($GLOBALS['main_user'],	$GLOBALS['main_pass'],	'lecturer',
-								'attendance',			'user',
+								'staff',			'staff',
 								'id',					$_SESSION['user'],
 								'password',				$_SESSION['password']);
-								
+																
 if(!$ap_verification){exit(0);}
 
 ////////////data section/////////////////////////
 $sql_t='select * from user where id=\''.$_SESSION['user'].'\' ';
 $result_t=run_query($link,'attendance',$sql_t);
 $data_t=get_single_row($result_t);
-$t_name=$data_t['name'];
+$t_name=$data_t['fullname'];
 
 //List lectures
 $sql='select * from lecture where teacher_id=\''.$_SESSION['user'].'\' order by date desc';
@@ -152,6 +157,7 @@ echo 			'</div>';
 */
 						
 echo '						<button class="btn btn-info" type=submit name=enroll_type value=batch>Enroll Batch</button>';
+echo '						<button class="btn btn-info" type=submit name=unenroll_type value=batch>Un-Enroll Batch</button>';
 //echo '						<button class="btn btn-info" type=submit name=enroll_type value=individual>Individual Enrollment</button>';
 echo 						'<input type=hidden name=lecture_id value=\''.$_POST['lecture_id'].'\'>';  
 						}
@@ -171,7 +177,7 @@ echo	'<div class="row">
 							{
 								echo '<form method=post>';
 echo '				<div class="form-group">';
-echo 					'<h3 class="text-center bg-warning"><span class="badge-pill badge-danger">Available batches</span></h3>';
+echo 					'<h3 class="text-center bg-warning"><span class="badge-pill badge-danger">Available batches for enrollment</span></h3>';
 echo 				'</div>';
 							
 echo '				<div class="form-group">';
@@ -180,7 +186,7 @@ echo '				<div class="form-group">';
 								while($data_batch=get_single_row($result_batch))
 								{
 echo 				'<button class="btn btn-info" type=submit name=batch_id value=\''.$data_batch['id'].'\' >';
-echo 					'<span class="badge-pill badge-danger">'.$data_batch['name'].'</span><br>'.$data_batch['from_roll_no'].'<br>'.$data_batch['to_roll_no'];
+echo 					'Enroll<br><span class="badge-pill badge-danger">'.$data_batch['name'].'</span><br>'.$data_batch['from_roll_no'].'<br>'.$data_batch['to_roll_no'];
 echo 				'</button>';
 								
 								}
@@ -193,7 +199,39 @@ echo'	</div>';
 						}
 
 ///////row end
-	
+
+
+/////row start
+						if(isset($_POST['lecture_id']) && isset($_POST['unenroll_type']))
+						{
+echo	'<div class="row">
+			<div class="col-sm-12 bg-light text-center">	';
+							if($_POST['unenroll_type']=='batch')
+							{
+								echo '<form method=post>';
+echo '				<div class="form-group">';
+echo 					'<h3 class="text-center bg-warning"><span class="badge-pill badge-danger">Select batch to un-enroll</span></h3>';
+echo 				'</div>';
+							
+echo '				<div class="form-group">';
+							$sql_batch='select * from batch';
+							$result_batch=run_query($link,'attendance',$sql_batch);
+								while($data_batch=get_single_row($result_batch))
+								{
+echo 				'<button class="btn btn-info" type=submit name=un_enroll_batch_id value=\''.$data_batch['id'].'\' >';
+echo 					'un-Enroll<br><span class="badge-pill badge-warning">'.$data_batch['name'].'</span><br>'.$data_batch['from_roll_no'].'<br>'.$data_batch['to_roll_no'];
+echo 				'</button>';
+								
+								}
+echo 						'<input type=hidden name=lecture_id value=\''.$_POST['lecture_id'].'\'>';  
+echo							'</form>';
+							}
+echo				'</div>';
+echo		'</div>';
+echo'	</div>';
+						}
+
+///////row end	
 /////row start
 if(isset($_POST['lecture_id']) && isset($_POST['batch_id']))
 {
@@ -226,7 +264,32 @@ if(isset($_POST['lecture_id']) && isset($_POST['batch_id']))
 
 ///////row end
 
+/////row start
+if(isset($_POST['lecture_id']) && isset($_POST['un_enroll_batch_id']))
+{
+	$batch_s='select * from batch where id=\''.$_POST['un_enroll_batch_id'].'\'';
+	$batch_r=run_query($link,'attendance',$batch_s);
+	$batch_d=get_single_row($batch_r);
+	
+	$err='';
+	
+	echo '
 
+	<span id=error_sh class="badge-pill badge-danger"
+			onclick="showhide_with_label(\'error\',this,\'error\')">show error</span><div id=error style="display:none;">';
+
+		$att_s='delete from  attendance where lecture_id=\''.$_POST['lecture_id'].'\' 
+					and student_id between \''.$batch_d['from_roll_no'].'\'  and \''.$batch_d['to_roll_no'].'\' ';
+								
+		$att_r=run_query($link,'attendance',$att_s);
+		
+		if(!$att_r)
+		{$err=$err.'can not un-enroll '.$_POST['un_enroll_batch_id'].'<br>';}
+	echo '</div>';
+}
+
+
+///////row end
 if(isset($_POST['lecture_id']))
 {
 //==============enrollment
@@ -314,6 +377,7 @@ echo 				'<div style="display:inline" id=\'student_id_'.$roww['student_id'].'\'>
 							<button 	class="btn"  
 										style=\''.$style.'\' '.$onclick.'>';
 																	
+echo 					round($roww['student_id']/1000).'<br>';
 echo 						'<h1>'.str_pad(($roww['student_id']%1000),3,"0",STR_PAD_LEFT).'</h1>';
 echo 					'</button>
 					</div>';

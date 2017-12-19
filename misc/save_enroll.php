@@ -28,26 +28,24 @@ if(!$ap_verification){exit(0);}
 				lecture_id=\''.$_POST['lecture_id'].'\'';
 	$ret=run_query($link,'attendance',$sql);
 	
+	//echo $_POST['student_id'].'<br>'.$_POST['lecture_id'].'<br>'.$_POST['present'].'-'.$ret;
+	//echo $_POST['student_id'].'<br>'.$_POST['lecture_id'].'<br>'.$_POST['present'].'-'.$ret;
+
+
 		if($change_to==0){$style='background-color:red;';}
 		elseif($change_to==1){$style='background-color:green';}
 			
-				$to_jkey=array('student_id','lecture_id','present');
-				$to_jval=array($_POST['student_id'],$_POST['lecture_id'],$change_to);
-				
-				$jkey=htmlspecialchars(json_encode($to_jkey));
-				$jval=htmlspecialchars(json_encode($to_jval));
-
-				
-echo 				'
-							<button 	class="btn"  
-										style=\''.$style.'\'
-			onclick="		
-			do_work('.$jkey.','.$jval.',\'student_id_'.$_POST['student_id'].'\',\'save_presence.php\');"
-							
-										type=button 
-										style="text-align:left;" >';
-echo 					round($_POST['student_id']/1000).'<br>';																	
-echo 						'<h1>'.str_pad(($_POST['student_id']%1000),3,"0",STR_PAD_LEFT).'</h1>';
-echo 					'</button>';
+		echo '
+						<button class="btn"  style=\''.$style.'\' onclick="do_work(
+									\''.$_POST['student_id'].'\',
+									\''.$_POST['lecture_id'].'\',
+									\''.$change_to.'\',
+									\'student_id_'.$_POST['student_id'].'\',
+									\'save_enroll.php\')" 
+						type=button style="text-align:left;" >';
+						
+												
+		echo '<h1>'.str_pad(($_POST['student_id']%1000),3,"0",STR_PAD_LEFT).'</h1>';
+		echo '</button>';
 	
 ?>
